@@ -3,15 +3,11 @@ This  script suite help us to analyze and observe (in the most easy way possible
 
 ## Requirements
 
----
-
 - Linux or Unix environment. This script was testing in Ubuntu 20.04 and macOS Monterey 12.1
 - `aws-cli` installed and configured (aws profile with `aws_access_key_id` and `aws_secret_access_key`). We need to have this installed because is with this tool that the script collect all the data about our lambdas.
 - `jq` . If the script detects this dependency is not installed it will perform the installation so, not worry. This dependency is used to make some actions on JSON documents.
 
 ## ¿How to use it?
-
----
 
 `bash check-lambdas-health.sh [-p <aws_profile_name>] [-f <filter>] [-h]`
 
@@ -29,8 +25,6 @@ Some examples to understand better:
 - `bash check-lambdas-health.sh -p staging -f test` → This execute the scripts with “staging” profile and filter the lambdas that name contains “test”.
 
 ## ¿What can i perform?
-
----
 
 - CloudWatch last log for lambdas.
 - Invoke to each of it to see StatusCode and FunctionError.
