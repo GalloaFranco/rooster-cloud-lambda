@@ -229,6 +229,7 @@ do
                 *)
                   echo -e "${RED}[Error] Invalid parameter ${NC}"
                   exit 1
+                  ;;
         esac
 done
 
