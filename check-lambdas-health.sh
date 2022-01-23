@@ -28,6 +28,22 @@ unset FILTER
 # Functions
 # =============================================================================
 
+spinner () {
+  # =============================================================================
+  # We need to use this function after job control (ampersand symbol).
+  # =============================================================================
+  pid=$! # Get last pid
+  spin='-\|/'
+  i=0
+  while kill -0 $pid 2>/dev/null
+  do
+    i=$(( (i+1) %4 ))
+    printf "\r${BLUE} ${spin:$i:1} ${NC}"
+    sleep .1
+  done
+  echo -ne "\033[0K\r" # Erase previous line with spinner
+}
+
 validateRequirements () {
 
   echo -e "${BLUE}[Info] Verifying requirements to run this script... ${NC}"
@@ -69,7 +85,7 @@ codeSizeScript () {
 
   local query='Functions[?starts_with(FunctionName, `'"${FILTER}"'`) == `true`].FunctionName'
 
-  local lambdas=$(aws --profile "${PROFILE}" lambda list-functions  --query "$query" --output text)
+  local lambdas=$(aws --profile "${PROFILE}" lambda list-functions  --query "$query" --output text) 2>/dev/null & spinner
 
   local my_array=($(echo "${lambdas}" | sed 's/ *$//g'))
 
@@ -78,7 +94,7 @@ codeSizeScript () {
   for i in "${my_array[@]}"
   do
    counter=$[$counter+1]
-   local response=$(aws --profile "${PROFILE}" lambda get-function --function-name "${i}" --query 'Configuration.CodeSize' --output text)
+   local response=$(aws --profile "${PROFILE}" lambda get-function --function-name "${i}" --query 'Configuration.CodeSize' --output text) 2>/dev/null & spinner
 
    if [ $response -le $minimum_size ]
    then
@@ -95,7 +111,7 @@ responseAnalysis () {
 
   local query='Functions[?starts_with(FunctionName, `'"${FILTER}"'`) == `true`].FunctionName'
 
-  local lambdas=$(aws --profile ${PROFILE} lambda list-functions  --query "${query}" --output text)
+  local lambdas=$(aws --profile ${PROFILE} lambda list-functions  --query "${query}" --output text) 2>/dev/null & spinner
 
   local my_array=($(echo ${lambdas} | sed 's/ *$//g'))
 
@@ -104,7 +120,7 @@ responseAnalysis () {
   for i in "${my_array[@]}"
   do
    counter=$[$counter+1]
-   local response=$(aws --profile ${PROFILE} lambda invoke --function-name ${i} response.txt)
+   local response=$(aws --profile ${PROFILE} lambda invoke --function-name ${i} response.txt) 2>/dev/null & spinner
    local status_code=$(echo ${response} | jq -r .StatusCode)
    local function_error=$(echo ${response} | jq -r .FunctionError)
 
@@ -133,7 +149,7 @@ showLastLog () {
 
   echo -e "${BLUE}[Info] Starting scan... ${NC}"
 
-  local group_name=$(aws logs describe-log-groups --profile ${PROFILE} --query 'logGroups[*].logGroupName' | grep $lambda_name)
+  local group_name=$(aws logs describe-log-groups --profile ${PROFILE} --query 'logGroups[*].logGroupName' | grep $lambda_name) 2>/dev/null & spinner
 
   local group_name_fixed=$(echo $group_name | sed 's/,//g' | sed 's/\"//g')
 
@@ -147,7 +163,7 @@ showLastLog () {
 
   local log_stream_fixed=$(echo $log_stream | sed 's/\[//' |  sed 's/.$//' | sed 's/\"//g')
 
-  local result=$(aws logs get-log-events --profile ${PROFILE} --log-group-name ${group_name_fixed} --log-stream-name ${log_stream_fixed})
+  local result=$(aws logs get-log-events --profile ${PROFILE} --log-group-name ${group_name_fixed} --log-stream-name ${log_stream_fixed}) 2>/dev/null & spinner
   echo $result | jq
 
 }
