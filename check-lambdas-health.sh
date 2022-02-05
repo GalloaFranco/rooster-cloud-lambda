@@ -35,7 +35,7 @@ spinner () {
   pid=$! # Get last pid
   spin='-\|/'
   i=0
-  while kill -0 $pid 2>/dev/null
+  while kill -0 $pid 2>/dev/null # kill -0 checks access to pid
   do
     i=$(( (i+1) %4 ))
     printf "\r${BLUE} ${spin:$i:1} ${NC}"
