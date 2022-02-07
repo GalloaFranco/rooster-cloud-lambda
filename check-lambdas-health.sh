@@ -31,17 +31,19 @@ unset FILTER
 spinner () {
   # =============================================================================
   # We need to use this function after job control (ampersand symbol).
+  # > kill -0 checks access to pid
+  # > echo -ne "\033[0K\r" # Erase previous line with spinner
   # =============================================================================
   pid=$! # Get last pid
   spin='-\|/'
   i=0
-  while kill -0 $pid 2>/dev/null # kill -0 checks access to pid
+  while kill -0 $pid 2>/dev/null
   do
     i=$(( (i+1) %4 ))
     printf "\r${BLUE} ${spin:$i:1} ${NC}"
     sleep .1
   done
-  echo -ne "\033[0K\r" # Erase previous line with spinner
+  echo -ne "\033[0K\r"
 }
 
 validateRequirements () {
