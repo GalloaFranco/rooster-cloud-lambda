@@ -87,7 +87,7 @@ codeSizeScript () {
 
   local query='Functions[?starts_with(FunctionName, `'"${FILTER}"'`) == `true`].FunctionName'
 
-  local lambdas=$(aws --profile "${PROFILE}" lambda list-functions  --query "$query" --output text) 2>/dev/null & spinner
+  local lambdas=$(aws --profile "${PROFILE}" lambda list-functions  --query "$query" --output text)
 
   local my_array=($(echo "${lambdas}" | sed 's/ *$//g'))
 
@@ -96,7 +96,7 @@ codeSizeScript () {
   for i in "${my_array[@]}"
   do
    counter=$[$counter+1]
-   local response=$(aws --profile "${PROFILE}" lambda get-function --function-name "${i}" --query 'Configuration.CodeSize' --output text) 2>/dev/null & spinner
+   local response=$(aws --profile "${PROFILE}" lambda get-function --function-name "${i}" --query 'Configuration.CodeSize' --output text)
 
    if [ $response -le $minimum_size ]
    then
@@ -113,7 +113,7 @@ responseAnalysis () {
 
   local query='Functions[?starts_with(FunctionName, `'"${FILTER}"'`) == `true`].FunctionName'
 
-  local lambdas=$(aws --profile ${PROFILE} lambda list-functions  --query "${query}" --output text) 2>/dev/null & spinner
+  local lambdas=$(aws --profile ${PROFILE} lambda list-functions  --query "${query}" --output text)
 
   local my_array=($(echo ${lambdas} | sed 's/ *$//g'))
 
@@ -122,7 +122,7 @@ responseAnalysis () {
   for i in "${my_array[@]}"
   do
    counter=$[$counter+1]
-   local response=$(aws --profile ${PROFILE} lambda invoke --function-name ${i} response.txt) 2>/dev/null & spinner
+   local response=$(aws --profile ${PROFILE} lambda invoke --function-name ${i} response.txt)
    local status_code=$(echo ${response} | jq -r .StatusCode)
    local function_error=$(echo ${response} | jq -r .FunctionError)
 
@@ -151,7 +151,7 @@ showLastLog () {
 
   echo -e "${BLUE}[Info] Starting scan... ${NC}"
 
-  local group_name=$(aws logs describe-log-groups --profile ${PROFILE} --query 'logGroups[*].logGroupName' | grep $lambda_name) 2>/dev/null & spinner
+  local group_name=$(aws logs describe-log-groups --profile ${PROFILE} --query 'logGroups[*].logGroupName' | grep $lambda_name)
 
   local group_name_fixed=$(echo $group_name | sed 's/,//g' | sed 's/\"//g')
 
@@ -165,7 +165,7 @@ showLastLog () {
 
   local log_stream_fixed=$(echo $log_stream | sed 's/\[//' |  sed 's/.$//' | sed 's/\"//g')
 
-  local result=$(aws logs get-log-events --profile ${PROFILE} --log-group-name ${group_name_fixed} --log-stream-name ${log_stream_fixed}) 2>/dev/null & spinner
+  local result=$(aws logs get-log-events --profile ${PROFILE} --log-group-name ${group_name_fixed} --log-stream-name ${log_stream_fixed})
   echo $result | jq
 
 }
