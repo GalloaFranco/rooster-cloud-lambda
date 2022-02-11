@@ -28,22 +28,18 @@ unset FILTER
 # Functions
 # =============================================================================
 
-spinner () {
-  # =============================================================================
-  # We need to use this function after job control (ampersand symbol).
-  # > kill -0 checks access to pid
-  # > echo -ne "\033[0K\r" # Erase previous line with spinner
-  # =============================================================================
-  pid=$! # Get last pid
-  spin='-\|/'
-  i=0
-  while kill -0 $pid 2>/dev/null
+spinner()
+{
+  spin="-\|/'"
+  while :
   do
-    i=$(( (i+1) %4 ))
-    printf "\r${BLUE} ${spin:$i:1} ${NC}"
-    sleep .1
+    for i in `seq 0 10`
+    do
+      printf "\r${BLUE} ${spin:$i:1} ${NC}"
+      echo -ne "\033[0K\r"
+      sleep .1
+    done
   done
-  echo -ne "\033[0K\r"
 }
 
 validateRequirements () {
@@ -87,7 +83,11 @@ codeSizeScript () {
 
   local query='Functions[?starts_with(FunctionName, `'"${FILTER}"'`) == `true`].FunctionName'
 
+  spinner &
+  SPIN_PID=$!
+  trap "kill -9 $SPIN_PID" `seq 0 15`
   local lambdas=$(aws --profile "${PROFILE}" lambda list-functions  --query "$query" --output text)
+  kill -9 $SPIN_PID
 
   local my_array=($(echo "${lambdas}" | sed 's/ *$//g'))
 
@@ -96,7 +96,12 @@ codeSizeScript () {
   for i in "${my_array[@]}"
   do
    counter=$[$counter+1]
+
+   spinner &
+   SPIN_PID=$!
+   trap "kill -9 $SPIN_PID" `seq 0 15`
    local response=$(aws --profile "${PROFILE}" lambda get-function --function-name "${i}" --query 'Configuration.CodeSize' --output text)
+   kill -9 $SPIN_PID
 
    if [ $response -le $minimum_size ]
    then
@@ -113,7 +118,11 @@ responseAnalysis () {
 
   local query='Functions[?starts_with(FunctionName, `'"${FILTER}"'`) == `true`].FunctionName'
 
+  spinner &
+  SPIN_PID=$!
+  trap "kill -9 $SPIN_PID" `seq 0 15`
   local lambdas=$(aws --profile ${PROFILE} lambda list-functions  --query "${query}" --output text)
+  kill -9 $SPIN_PID
 
   local my_array=($(echo ${lambdas} | sed 's/ *$//g'))
 
@@ -122,7 +131,13 @@ responseAnalysis () {
   for i in "${my_array[@]}"
   do
    counter=$[$counter+1]
+
+   spinner &
+   SPIN_PID=$!
+   trap "kill -9 $SPIN_PID" `seq 0 15`
    local response=$(aws --profile ${PROFILE} lambda invoke --function-name ${i} response.txt)
+   kill -9 $SPIN_PID
+
    local status_code=$(echo ${response} | jq -r .StatusCode)
    local function_error=$(echo ${response} | jq -r .FunctionError)
 
@@ -151,7 +166,11 @@ showLastLog () {
 
   echo -e "${BLUE}[Info] Starting scan... ${NC}"
 
+  spinner &
+  SPIN_PID=$!
+  trap "kill -9 $SPIN_PID" `seq 0 15`
   local group_name=$(aws logs describe-log-groups --profile ${PROFILE} --query 'logGroups[*].logGroupName' | grep $lambda_name)
+  kill -9 $SPIN_PID
 
   local group_name_fixed=$(echo $group_name | sed 's/,//g' | sed 's/\"//g')
 
@@ -165,7 +184,12 @@ showLastLog () {
 
   local log_stream_fixed=$(echo $log_stream | sed 's/\[//' |  sed 's/.$//' | sed 's/\"//g')
 
+  spinner &
+  SPIN_PID=$!
+  trap "kill -9 $SPIN_PID" `seq 0 15`
   local result=$(aws logs get-log-events --profile ${PROFILE} --log-group-name ${group_name_fixed} --log-stream-name ${log_stream_fixed})
+  kill -9 $SPIN_PID
+
   echo $result | jq
 
 }
