@@ -218,7 +218,7 @@ showMenu () {
               break
               ;;
             "exit")
-              echo -e "${BLUE}Bye! and thanks for use this script 👋🏻"
+              echo -e "${BLUE}Bye! and thanks for use this script 👋"
               exit 0
               ;;
             *)
