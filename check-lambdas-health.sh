@@ -72,6 +72,10 @@ validateRequirements () {
   fi
 }
 
+functionDetails () {
+  echo "Details..."
+}
+
 codeSizeScript () {
 
   echo -e "${BLUE}▶︎ Ingress the minimum size for the lambda code (in bytes, 100000 = 100kb) : ${NC}"
@@ -198,10 +202,15 @@ showMenu () {
 
   echo -e "${YELLOW}============= Menu ============= ${NC}"
 
-  local options=("response analysis" "code size analysis" "view last log" "exit")
+  local options=("function details" "response analysis" "code size analysis" "view last log" "exit")
   select script in "${options[@]}"
   do
      case $script in
+            "function details")
+            validateRequirements
+            functionDetails
+            break
+            ;;
             "response analysis")
               validateRequirements
               responseAnalysis
