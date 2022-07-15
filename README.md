@@ -24,7 +24,7 @@ Some examples to understand better:
 - `bash check-lambdas-health.sh -p staging` → This execute the scripts with “staging” profile
 - `bash check-lambdas-health.sh -p staging -f test` → This execute the scripts with “staging” profile and filter the lambdas that name contains “test”.
 
-## ¿What can i perform?
+## ¿What can I perform?
 
 - CloudWatch last log for lambdas.
 - Invoke to each of it to see StatusCode and FunctionError.
